@@ -6,6 +6,10 @@ str = "HELLO";
 if(x<20) x++;
 /* ONELINER */
 
+funct(a, b) {
+    return a+b;
+}
+
 /*
 SECOND
 line

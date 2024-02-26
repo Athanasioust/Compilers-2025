@@ -156,7 +156,9 @@ underscore [_]
 float {digit}*\.{digit}*
 string \"(\\.|[^\"])*\"
 comment \/\/.*
-multicomment \/\*
+multicomment \/\*(.|\n)*?\*\/
+/* multicomment "/*"
+
 
 /*** Rules Section ***/
 %%
@@ -202,8 +204,9 @@ multicomment \/\*
 }
 {multicomment} {
   ++token_num;
-  char *text = parseMulticomment();
-  temp=createToken(yylineno,token_num,text,text,"MULTICOMMENT");
+  printf("I AM HERE\n");
+  //char *text = parseMulticomment();
+  temp=createToken(yylineno,token_num,yytext,yytext,"MULTICOMMENT");
   appendToken(temp);
 }
 {ws} {
@@ -259,11 +262,11 @@ void Print(FILE *stream) {
         } else if(!strcmp(current->type,"IDENTIFIER")) {
             fprintf(stream,"%-*d: #%-*d \"%-*s\" %-*s %-*s <-char*\n", numline_width, current->numline, numToken_width, current->numToken, raw_content_width, current->raw_content, type_width, current->type, content_width, current->content);
         
-        } else if(!strcmp(current->type,"KEYWORD") || !strcmp(current->type,"OPERATOR") || !strcmp(current->type,"PUNCT_MARK")) {
+        } else if(!strcmp(current->type,"KEYWORD") || !strcmp(current->type,"OPERATOR") || !strcmp(current->type,"PUNCT_MARK") || !strcmp(current->type,"COMMENT")) {
             fprintf(stream,"%-*d: #%-*d \"%-*s\" %-*s %-*s <-enumerated\n", numline_width, current->numline, numToken_width, current->numToken, raw_content_width, current->raw_content, type_width, current->type, content_width, current->content);
   
 
-        }else if(!strcmp(current->type,"COMMENT") || !strcmp(current->type,"MULTICOMMENT")) {
+        }else if(!strcmp(current->type,"MULTICOMMENT")) {
             fprintf(stream,"%-*d: #%-*d \"%-*s\" %-*s %-*s <-enumerated\n", numline_width, current->numline, numToken_width, current->numToken, raw_content_width, current->raw_content, type_width, current->type, content_width, current->content);
         
         
@@ -291,9 +294,8 @@ void FreeFunct(){
 char *parseMulticomment() {
   int c;
   char *text;
-  
+  printf("I AM IN parseMULTICOMMENT\n");
   while((c = input()) != EOF) {
-
     if(c == '*') {
       if((c = input()) == '/') {
         text = strdup(yytext);
@@ -304,11 +306,12 @@ char *parseMulticomment() {
     }
     if(c =='/') {
       if((c = input()) == '*') {
-        parseMulticomment();
+        text = parseMulticomment();
       }else{
         unput(c);
       }
     }
+    return text;
   }
 
 }
