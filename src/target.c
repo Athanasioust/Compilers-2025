@@ -780,6 +780,7 @@ void print_vmarg_to_string(vmarg arg, char* buffer, size_t size) {
         case userfunc_a:   snprintf(buffer, size, "ufunc(%u)", arg.val); break;
         case libfunc_a:    snprintf(buffer, size, "libfunc(%u)", arg.val); break;
         case retval_a:     snprintf(buffer, size, "retval"); break;
+        case -1:           snprintf(buffer, size, "empty"); break;
         default:           snprintf(buffer, size, "unknown"); break;
     }
 }

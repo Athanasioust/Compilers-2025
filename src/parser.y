@@ -9,6 +9,7 @@
 	#include "../include/stack.h"
 	#include "../include/rule_handler.h"
 	#include "../include/parser.h"
+    #include "../include/target.h"
 
     int yyerror(char* message);
     int yylex(void);

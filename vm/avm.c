@@ -155,7 +155,7 @@ void avm_load_program(const char* filename) {
     fclose(file);
     
     // Initialize stack to accommodate global variables
-    top = AVM_STACKSIZE - totalUserFuncs - 1;
+    top = AVM_STACKSIZE - 10;
     topsp = top;
 }
 

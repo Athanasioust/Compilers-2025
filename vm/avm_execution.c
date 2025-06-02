@@ -5,7 +5,7 @@ void execute_assign(instruction* instr) {
     avm_memcell* lv = avm_translate_operand(&instr->result, (avm_memcell*)0);
     avm_memcell* rv = avm_translate_operand(&instr->arg1, &ax);
     
-    assert(lv && (&avm_stack[AVM_STACKSIZE-1] >= lv && lv > &avm_stack[top] || lv == &retval));
+    assert(lv && ((&avm_stack[AVM_STACKSIZE-1] >= lv && lv > &avm_stack[top]) || lv == &retval));
     assert(rv);
     
     avm_assign(lv, rv);
@@ -16,7 +16,7 @@ void execute_add(instruction* instr) {
     avm_memcell* rv1 = avm_translate_operand(&instr->arg1, &ax);
     avm_memcell* rv2 = avm_translate_operand(&instr->arg2, &bx);
     
-    assert(lv && (&avm_stack[AVM_STACKSIZE-1] >= lv && lv > &avm_stack[top] || lv == &retval));
+    assert(lv && ((&avm_stack[AVM_STACKSIZE-1] >= lv && lv > &avm_stack[top]) || lv == &retval));
     assert(rv1 && rv2);
     
     if (rv1->type != number_m || rv2->type != number_m) {
@@ -35,7 +35,7 @@ void execute_sub(instruction* instr) {
     avm_memcell* rv1 = avm_translate_operand(&instr->arg1, &ax);
     avm_memcell* rv2 = avm_translate_operand(&instr->arg2, &bx);
     
-    assert(lv && (&avm_stack[AVM_STACKSIZE-1] >= lv && lv > &avm_stack[top] || lv == &retval));
+    assert(lv && (((&avm_stack[AVM_STACKSIZE-1] >= lv) && (lv > &avm_stack[top])) || (lv == &retval)));
     assert(rv1 && rv2);
     
     if (rv1->type != number_m || rv2->type != number_m) {
@@ -54,7 +54,7 @@ void execute_mul(instruction* instr) {
     avm_memcell* rv1 = avm_translate_operand(&instr->arg1, &ax);
     avm_memcell* rv2 = avm_translate_operand(&instr->arg2, &bx);
     
-    assert(lv && (&avm_stack[AVM_STACKSIZE-1] >= lv && lv > &avm_stack[top] || lv == &retval));
+    assert(lv && (((&avm_stack[AVM_STACKSIZE-1] >= lv) && (lv > &avm_stack[top])) || (lv == &retval)));
     assert(rv1 && rv2);
     
     if (rv1->type != number_m || rv2->type != number_m) {
@@ -73,7 +73,7 @@ void execute_div(instruction* instr) {
     avm_memcell* rv1 = avm_translate_operand(&instr->arg1, &ax);
     avm_memcell* rv2 = avm_translate_operand(&instr->arg2, &bx);
     
-    assert(lv && (&avm_stack[AVM_STACKSIZE-1] >= lv && lv > &avm_stack[top] || lv == &retval));
+    assert(lv && (((&avm_stack[AVM_STACKSIZE-1] >= lv) && (lv > &avm_stack[top])) || (lv == &retval)));
     assert(rv1 && rv2);
     
     if (rv1->type != number_m || rv2->type != number_m) {
@@ -98,7 +98,7 @@ void execute_mod(instruction* instr) {
     avm_memcell* rv1 = avm_translate_operand(&instr->arg1, &ax);
     avm_memcell* rv2 = avm_translate_operand(&instr->arg2, &bx);
     
-    assert(lv && (&avm_stack[AVM_STACKSIZE-1] >= lv && lv > &avm_stack[top] || lv == &retval));
+    assert(lv && (((&avm_stack[AVM_STACKSIZE-1] >= lv) && (lv > &avm_stack[top])) || (lv == &retval)));
     assert(rv1 && rv2);
     
     if (rv1->type != number_m || rv2->type != number_m) {
@@ -122,7 +122,7 @@ void execute_uminus(instruction* instr) {
     avm_memcell* lv = avm_translate_operand(&instr->result, (avm_memcell*)0);
     avm_memcell* rv = avm_translate_operand(&instr->arg1, &ax);
     
-    assert(lv && (&avm_stack[AVM_STACKSIZE-1] >= lv && lv > &avm_stack[top] || lv == &retval));
+    assert((lv && ((&avm_stack[AVM_STACKSIZE-1] >= lv) && (lv > &avm_stack[top]))) || (lv == &retval));
     assert(rv);
     
     if (rv->type != number_m) {
@@ -142,7 +142,7 @@ void execute_and(instruction* instr) {
     avm_memcell* rv1 = avm_translate_operand(&instr->arg1, &ax);
     avm_memcell* rv2 = avm_translate_operand(&instr->arg2, &bx);
     
-    assert(lv && (&avm_stack[AVM_STACKSIZE-1] >= lv && lv > &avm_stack[top] || lv == &retval));
+    assert(lv && (((&avm_stack[AVM_STACKSIZE-1] >= lv) && (lv > &avm_stack[top])) || (lv == &retval)));
     assert(rv1 && rv2);
     
     avm_memcellclear(lv);
@@ -155,7 +155,7 @@ void execute_or(instruction* instr) {
     avm_memcell* rv1 = avm_translate_operand(&instr->arg1, &ax);
     avm_memcell* rv2 = avm_translate_operand(&instr->arg2, &bx);
     
-    assert(lv && (&avm_stack[AVM_STACKSIZE-1] >= lv && lv > &avm_stack[top] || lv == &retval));
+    assert(lv && (((&avm_stack[AVM_STACKSIZE-1] >= lv) && (lv > &avm_stack[top])) || (lv == &retval)));
     assert(rv1 && rv2);
     
     avm_memcellclear(lv);
@@ -167,7 +167,7 @@ void execute_not(instruction* instr) {
     avm_memcell* lv = avm_translate_operand(&instr->result, (avm_memcell*)0);
     avm_memcell* rv = avm_translate_operand(&instr->arg1, &ax);
     
-    assert(lv && (&avm_stack[AVM_STACKSIZE-1] >= lv && lv > &avm_stack[top] || lv == &retval));
+    assert(lv && (((&avm_stack[AVM_STACKSIZE-1] >= lv) && (lv > &avm_stack[top])) || (lv == &retval)));
     assert(rv);
     
     avm_memcellclear(lv);
@@ -436,7 +436,7 @@ void execute_funcexit(instruction* unused) {
 
 void execute_newtable(instruction* instr) {
     avm_memcell* lv = avm_translate_operand(&instr->result, (avm_memcell*)0);
-    assert(lv && (&avm_stack[AVM_STACKSIZE-1] >= lv && lv > &avm_stack[top] || lv == &retval));
+    assert(lv && (((&avm_stack[AVM_STACKSIZE-1] >= lv) && (lv > &avm_stack[top])) || (lv == &retval)));
     
     avm_memcellclear(lv);
     lv->type = table_m;
@@ -449,8 +449,8 @@ void execute_tablegetelem(instruction* instr) {
     avm_memcell* t = avm_translate_operand(&instr->arg1, (avm_memcell*)0);
     avm_memcell* i = avm_translate_operand(&instr->arg2, &ax);
     
-    assert(lv && (&avm_stack[AVM_STACKSIZE-1] >= lv && lv > &avm_stack[top] || lv == &retval));
-    assert(t && (&avm_stack[AVM_STACKSIZE-1] >= t && t > &avm_stack[top]));
+    assert(lv && ((&avm_stack[AVM_STACKSIZE-1] >= lv) && (lv > &avm_stack[top] || lv == &retval)));
+    assert(t && ((&avm_stack[AVM_STACKSIZE-1] >= t) && (t > &avm_stack[top])));
     assert(i);
     
     avm_memcellclear(lv);
@@ -477,7 +477,7 @@ void execute_tablesetelem(instruction* instr) {
     avm_memcell* i = avm_translate_operand(&instr->arg2, &ax);
     avm_memcell* c = avm_translate_operand(&instr->result, &bx);
     
-    assert(t && (&avm_stack[AVM_STACKSIZE-1] >= t && t > &avm_stack[top]));
+    assert(t && ((&avm_stack[AVM_STACKSIZE-1] >= t) && (t > &avm_stack[top])));
     assert(i && c);
     
     if (t->type != table_m) {
