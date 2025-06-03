@@ -29,6 +29,7 @@ typedef enum vmopcode {
     jge_v,
     jlt_v,
     jgt_v,
+    jump_v,
     call_v,
     pusharg_v,
     funcenter_v,
@@ -36,7 +37,6 @@ typedef enum vmopcode {
     newtable_v,
     tablegetelem_v,
     tablesetelem_v,
-    jump_v,
     nop_v
 } vmopcode;
 

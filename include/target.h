@@ -2,6 +2,7 @@
 #define _TARGET_H_
 
 #include "structs.h"
+#include "stack.h"
 
 // VM Opcodes
 typedef enum vmopcode {
@@ -102,6 +103,7 @@ extern unsigned currNamedLibfunc;
 extern SymbolTableEntry** userFuncs;
 extern unsigned totalUserFuncs;
 extern unsigned currUserFunc;
+extern stack_T funcJumpStack;
 
 // Macro for instruction expansion
 #define EXPAND_SIZE_INSTR 1024

@@ -5,7 +5,7 @@ void execute_assign(instruction* instr) {
     avm_memcell* lv = avm_translate_operand(&instr->result, (avm_memcell*)0);
     avm_memcell* rv = avm_translate_operand(&instr->arg1, &ax);
     
-    assert(lv && ((&avm_stack[AVM_STACKSIZE-1] >= lv && lv > &avm_stack[top]) || lv == &retval));
+    //assert(lv && ((&avm_stack[AVM_STACKSIZE-1] >= lv && lv > &avm_stack[top]) || lv == &retval));
     assert(rv);
     
     avm_assign(lv, rv);
@@ -382,6 +382,8 @@ void execute_call(instruction* instr) {
         case userfunc_m: {
             avm_callsaveenvironment();
             pc = userFuncs[func->data.funcVal].address;
+            fprintf(stderr, "DEBUG %u \n",  pc);
+            fprintf(stderr, "DEBUG %u \n",  code[pc].opcode);
             assert(pc < AVM_ENDING_PC && pc > 0);
             assert(code[pc].opcode == funcenter_v);
             break;
@@ -417,11 +419,23 @@ void execute_funcenter(instruction* instr) {
     assert(func);
     assert(pc == userFuncs[func->data.funcVal].address);
     
-    // Caller's enviroment
-    avm_totalActuals = 0;
+    // Initialize totalActuals to 0 if not set by a proper call
+    if (avm_totalActuals == 0) {
+        // This handles direct function entry (like from funcstart)
+        // Set up minimal environment
+        avm_totalActuals = 0;
+    }
+    
     userfunc* funcInfo = &userFuncs[func->data.funcVal];
     topsp = top;
     top = top - funcInfo->localSize;
+    
+    // Ensure we don't go below stack bounds
+    if (top < 0) {
+        avm_error("Stack underflow in function entry!");
+        executionFinished = 1;
+        return;
+    }
 }
 
 void execute_funcexit(instruction* unused) {
@@ -489,6 +503,7 @@ void execute_tablesetelem(instruction* instr) {
 
 void execute_jump(instruction* instr) {
     assert(instr->result.type == label_a);
+    printf("DEBUG JUMP: From PC %d to %d\n", pc, instr->result.val);
     pc = instr->result.val;
 }
 

@@ -347,6 +347,6 @@ int main(int argc, char **argv) {
     generate();
     printf("DEBUG: generate completed\n");
     print_target_code();
-    print_binary_file("alpha.abc");
+    print_binary_file("binary.abc");
     return 0;
 }

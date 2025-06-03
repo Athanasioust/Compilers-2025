@@ -179,16 +179,19 @@ void avm_run(void) {
         instr = &code[pc];
         currLine = instr->srcLine;
         
-
         if (instr->opcode < 0 || instr->opcode >= sizeof(executeFuncs)/sizeof(executeFuncs[0])) {
             avm_error("Invalid opcode: %d", instr->opcode);
             executionFinished = 1;
             break;
         }
         
-        
+        unsigned oldpc = pc;
         executeFuncs[instr->opcode](instr);
-        ++pc;
+        
+        // Only increment PC if it wasn't changed by the instruction
+        if (pc == oldpc) {
+            ++pc;
+        }
     }
 }
 

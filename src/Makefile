@@ -5,7 +5,7 @@ CFLAGS=-I $(IDIR) -DDEBUG -Wall -g
 OBJ=lex.yy.c parser.c rule_handler.c symtable.c stack.c structs.c target.c
 
 all: parser lex
-	$(CC) $(CFLAGS) $(OBJ) -o $(BASE_DIR)/alpha.exe
+	$(CC) $(CFLAGS) $(OBJ) -o $(BASE_DIR)/compiler.exe
 
 parser:
 	bison --yacc --defines parser.y --output=parser.c

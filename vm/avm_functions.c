@@ -60,27 +60,27 @@ void avm_calllibfunc(char* funcName) {
         avm_error("Unsupported library function '%s' called!", funcName);
         executionFinished = 1;
     } else {
-        // For library functions, we need to restore the correct topsp
-        // The arguments are already on the stack from pusharg instructions
-        // topsp should point to where the environment was saved
-        unsigned oldTopsp = topsp;
-        topsp = top + AVM_STACKENV_SIZE;  // Point to saved environment
-        
-        // Call the function
+        // Library functions don't need environment save/restore
+        // Just call the function directly
         f();
         
-        // Restore environment after library function call
-        avm_callrestoreenvironment();
+        // Clear the arguments from the stack
+        // The arguments were pushed by pusharg instructions
+        while (avm_totalActuals > 0) {
+            avm_memcellclear(&avm_stack[top + 1]);
+            ++top;
+            --avm_totalActuals;
+        }
     }
 }
 
 unsigned avm_totalactuals(void) {
-    return avm_stack[topsp + AVM_NUMACTUALS_OFFSET].data.numVal;
+    return avm_totalActuals;
 }
 
 avm_memcell* avm_getactual(unsigned i) {
     assert(i < avm_totalactuals());
-    return &avm_stack[topsp + AVM_STACKENV_SIZE + 1 + i];
+    return &avm_stack[top + 1 + i];
 }
 
 void avm_dec_top(void) {

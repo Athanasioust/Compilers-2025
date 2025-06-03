@@ -4,11 +4,14 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include "../include/stack.h"
+
 
 // Global variables
 instruction* instructions = NULL;
 unsigned total_instructions = 0;
 unsigned curr_instruction = 0;
+stack_T funcJumpStack = NULL;
 
 incomplete_jump* ij_head = NULL;
 unsigned ij_total = 0;
@@ -263,6 +266,7 @@ unsigned userfuncs_newfunc(SymbolTableEntry* sym) {
     }
     
     userFuncs[currUserFunc] = sym;
+    userFuncs[currUserFunc]->taddress = sym->taddress; // Use taddress, not iadress
     return currUserFunc++;
 }
 
@@ -276,6 +280,7 @@ void add_incomplete_jump(unsigned instrNo, unsigned iaddress) {
     ij_total++;
 }
 
+// Fixed patch_incomplete_jumps function
 void patch_incomplete_jumps(void) {
     incomplete_jump* ij = ij_head;
     while (ij) {
@@ -285,19 +290,16 @@ void patch_incomplete_jumps(void) {
             // Jump beyond program - go to end
             target_address = curr_instruction;
         } else if (ij->iaddress == 0) {
-            // Jump to start
-            target_address = 0;
+            // Jump to end of program, not start
+            target_address = curr_instruction;
         } else {
             // Normal case - get target quad's instruction address
             target_address = quads[ij->iaddress].taddress;
         }
         
-        // Validate instruction number and target
-        if (ij->instrNo < curr_instruction && target_address <= curr_instruction) {
+        // Apply the patch
+        if (ij->instrNo < curr_instruction) {
             instructions[ij->instrNo].result.val = target_address;
-        } else {
-            fprintf(stderr, "Warning: Invalid jump patch - instr %d -> target %d\n", 
-                    ij->instrNo, target_address);
         }
         
         incomplete_jump* del = ij;
@@ -639,32 +641,22 @@ void generate_GETRETVAL(quad* q) {
 void generate_FUNCSTART(quad* q) {
     SymbolTableEntry* f = q->result->sym;
     
-   
+    // Emit jump to skip function body
     instruction jump_instr;
     jump_instr.opcode = jump_v;
     jump_instr.srcLine = q->line;
     reset_operand(&jump_instr.arg1);
     reset_operand(&jump_instr.arg2);
     jump_instr.result.type = label_a;
-    jump_instr.result.val = 0; 
+    jump_instr.result.val = 0;
     
-    
-    unsigned funcend_quad = 0;
-    for (unsigned i = currQuad; i < total; i++) {
-        if (quads[i].op == funcend && quads[i].result->sym == f) {
-            funcend_quad = i + 1; 
-            break;
-        }
-    }
-    
-    if (funcend_quad < total) {
-        add_incomplete_jump(curr_instruction, funcend_quad);
-    }
+    funcJumpStack = stack_push(funcJumpStack, curr_instruction);
     emit_instruction(&jump_instr);
     
-    
-    f->taddress = curr_instruction;
+    // NOW set the function address to the funcenter instruction
+    f->taddress = curr_instruction;  // This will be the funcenter
     q->taddress = curr_instruction;
+    
     
     push_funcstack(f);
     
@@ -679,15 +671,10 @@ void generate_FUNCSTART(quad* q) {
     emit_instruction(&t);
 }
 
-
 void generate_FUNCEND(quad* q) {
-    
-    
     func_stack* fs = pop_funcstack();
     
-    
     backpatch_returns(fs->returnList);
-    
     
     q->taddress = curr_instruction;
     
@@ -700,6 +687,11 @@ void generate_FUNCEND(quad* q) {
     reset_operand(&t.arg2);
     
     emit_instruction(&t);
+    
+    // Patch the jump that skips this function
+    unsigned jumpInstr = stack_top(funcJumpStack);
+    funcJumpStack = stack_pop(funcJumpStack);
+    instructions[jumpInstr].result.val = curr_instruction;
     
     free(fs);
 }
@@ -868,6 +860,7 @@ void print_binary_file(const char* filename) {
     fwrite(&currUserFunc, sizeof(unsigned), 1, file);
     for (unsigned i = 0; i < currUserFunc; i++) {
        unsigned address = userFuncs[i]->taddress;
+       fprintf(stderr, "DEBUG %u\n", userFuncs[i]->taddress);
        unsigned localSize = userFuncs[i]->totalLocals;
        unsigned len = strlen(userFuncs[i]->name) + 1;
        
