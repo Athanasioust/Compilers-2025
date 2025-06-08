@@ -860,7 +860,6 @@ void print_binary_file(const char* filename) {
     fwrite(&currUserFunc, sizeof(unsigned), 1, file);
     for (unsigned i = 0; i < currUserFunc; i++) {
        unsigned address = userFuncs[i]->taddress;
-       fprintf(stderr, "DEBUG %u\n", userFuncs[i]->taddress);
        unsigned localSize = userFuncs[i]->totalLocals;
        unsigned len = strlen(userFuncs[i]->name) + 1;
        

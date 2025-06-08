@@ -80,7 +80,7 @@ unsigned avm_totalactuals(void) {
 
 avm_memcell* avm_getactual(unsigned i) {
     assert(i < avm_totalactuals());
-    return &avm_stack[top + 1 + i];
+    return &avm_stack[top + 1 + avm_totalActuals - 1 - i];
 }
 
 void avm_dec_top(void) {

@@ -130,6 +130,7 @@ extern unsigned programVarOffset;
 extern unsigned functionLocalOffset;
 extern unsigned formalArgOffset;
 extern unsigned scopeSpaceCounter;
+extern unsigned tempVarOffset;
 
 extern unsigned tempCounter;
 extern unsigned funcCounter;

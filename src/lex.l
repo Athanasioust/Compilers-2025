@@ -88,11 +88,38 @@ multicomment \/\*
 }
 
 {string} {
-    // Remove outer quotes before storing
-    yylval.sval = strndup(yytext + 1, strlen(yytext) - 2);
+    // Remove outer quotes and process escape sequences
+    char* src = yytext + 1;
+    int len = strlen(yytext) - 2;
+    char* dst = malloc(len + 1);
+    int j = 0;
+    
+    for (int i = 0; i < len; i++) {
+        if (src[i] == '\\' && i + 1 < len) {
+            switch (src[i + 1]) {
+                case 'n': dst[j++] = '\n'; i++; break;
+                case 'r': dst[j++] = '\r'; i++; break;
+                case 't': dst[j++] = '\t'; i++; break;
+                case '\\': dst[j++] = '\\'; i++; break;
+                case '"': dst[j++] = '"'; i++; break;
+                case '\'': dst[j++] = '\''; i++; break;
+                case 'a': dst[j++] = '\a'; i++; break;
+                case 'b': dst[j++] = '\b'; i++; break;
+                case 'f': dst[j++] = '\f'; i++; break;
+                case 'v': dst[j++] = '\v'; i++; break;
+                default: 
+                    dst[j++] = src[i]; // Keep backslash if unknown
+                    dst[j++] = src[i+1]; 
+                    i++;
+            }
+        } else {
+            dst[j++] = src[i];
+        }
+    }
+    dst[j] = '\0';
+    yylval.sval = dst;
     return STRING;
 }
-
 {comment} {}
 
 {digit}+ {

@@ -162,7 +162,7 @@ void avm_load_program(const char* filename) {
     fclose(file);
     
     // Initialize stack to accommodate global variables
-    top = AVM_STACKSIZE - 10;
+    top = AVM_STACKSIZE - 1 - 200;  // Reserve space for at least 200 globals
     topsp = top;
 }
 
@@ -175,7 +175,7 @@ void avm_run(void) {
     instruction* instr;
     
     while (!executionFinished && pc < codeSize) {
-        debug_stack_state("before_instruction");
+        //debug_stack_state("before_instruction");
         instr = &code[pc];
         currLine = instr->srcLine;
         

@@ -13,7 +13,7 @@ void libfunc_print(void) {
                 printf("%s", arg->data.strVal);
                 break;
             case number_m:
-                printf("%.3f", arg->data.numVal);
+                printf("%g", arg->data.numVal);
                 break;
             case bool_m:
                 printf("%s", arg->data.boolVal ? "true" : "false");

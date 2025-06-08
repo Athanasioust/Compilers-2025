@@ -382,8 +382,8 @@ void execute_call(instruction* instr) {
         case userfunc_m: {
             avm_callsaveenvironment();
             pc = userFuncs[func->data.funcVal].address;
-            fprintf(stderr, "DEBUG %u \n",  pc);
-            fprintf(stderr, "DEBUG %u \n",  code[pc].opcode);
+            //fprintf(stderr, "DEBUG %u \n",  pc);
+            //fprintf(stderr, "DEBUG %u \n",  code[pc].opcode);
             assert(pc < AVM_ENDING_PC && pc > 0);
             assert(code[pc].opcode == funcenter_v);
             break;
@@ -503,7 +503,6 @@ void execute_tablesetelem(instruction* instr) {
 
 void execute_jump(instruction* instr) {
     assert(instr->result.type == label_a);
-    printf("DEBUG JUMP: From PC %d to %d\n", pc, instr->result.val);
     pc = instr->result.val;
 }
 

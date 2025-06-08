@@ -12,6 +12,8 @@ unsigned	total = 1;
 unsigned	currQuad = 1;
 static unsigned tempCounterPerScope[100] = {0}; // Support up to 100 nested scopes
 static unsigned maxScope = 0;
+unsigned tempVarOffset = 0;  // Separate counter for temporaries
+
 
 // Expand the quad vector
 void expand (void) {
@@ -192,24 +194,22 @@ char* newTempName(){
 // Return a new temporary symbol
 SymbolTableEntry* newTemp(){
     char* name = newTempName();
-    if (strlen(name) > 100) {
-        printf("ERROR: Temp name too long: %s\n", name);
-        exit(1);
-    }
-    
-    
     
     SymbolTableEntry* temp = makeSymbol(name, 0, scope);
-    
-    
     temp->type = (scope ? VAR_LOCAL : VAR_GLOBAL);
     temp->space = currScopeSpace();
-    temp->offset = currScopeOffset();
+    
+    // Use separate offset for temporaries at global scope
+    if (scope == 0) {
+        temp->offset = tempVarOffset++;
+    } else {
+        temp->offset = currScopeOffset();
+        incCurrScopeOffset();
+    }
+    
     temp->taddress = 0;
     temp->totalLocals = 0;
     temp->iadress = 0;
-    
-    incCurrScopeOffset();
     
     // Insert into symbol table
     SymbolTableEntry* result = SymTable_insert(current_table, name, temp);
@@ -352,7 +352,7 @@ char* getStringValueQuad(Expr* e){
             return e->strConst;
         case constnum_e:{
             char* str = malloc(sizeof(char) * 32);
-            sprintf(str, "%.1f", e->numConst);
+            sprintf(str, "%.6f", e->numConst);  // Changed from %.1f to %.6f
             return str;
         }
         case nil_e:

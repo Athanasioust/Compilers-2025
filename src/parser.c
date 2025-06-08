@@ -2240,6 +2240,9 @@ int main(int argc, char **argv) {
     head = SymTable_new();
     current_table = head;
 
+    // Reserve space for temporary variables (0-99)
+    programVarOffset = 100;  // Start regular globals at offset 100
+
     // Add library functions
     libFunc(head, "print");
     libFunc(head, "input");
