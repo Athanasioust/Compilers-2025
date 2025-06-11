@@ -6,7 +6,7 @@ avm_memcell avm_stack[AVM_STACKSIZE];
 avm_memcell ax, bx, cx;
 avm_memcell retval;
 unsigned top, topsp;
-unsigned pc = 0;
+unsigned pc = 1;
 unsigned currLine = 0;
 unsigned codeSize = 0;
 instruction* code = NULL;
@@ -86,7 +86,7 @@ void avm_initialize(void) {
     
     top = AVM_STACKSIZE - 1;
     topsp = AVM_STACKSIZE - 1;
-    pc = 0;
+    pc = 1;
     currLine = 0;
     executionFinished = 0;
 }
@@ -155,8 +155,9 @@ void avm_load_program(const char* filename) {
     // Read instructions
     fread(&codeSize, sizeof(unsigned), 1, file);
     if (codeSize > 0) {
-        code = malloc(codeSize * sizeof(instruction));
-        fread(code, sizeof(instruction), codeSize, file);
+        code = malloc((codeSize + 1) * sizeof(instruction));  // +1 for index 0
+        fread(&code[1], sizeof(instruction), codeSize, file);  // Start at index 1
+        codeSize++;  // Adjust size to account for index 0
     }
     
     fclose(file);
@@ -174,10 +175,11 @@ void avm_run(void) {
     
     instruction* instr;
     
-    while (!executionFinished && pc < codeSize) {
-        //debug_stack_state("before_instruction");
+    while (!executionFinished && pc < codeSize) {  // pc starts at 1, runs to codeSize-1
         instr = &code[pc];
         currLine = instr->srcLine;
+
+        //printf("DEBUG: opcode %u line %d \n" , instr->opcode , pc);
         
         if (instr->opcode < 0 || instr->opcode >= sizeof(executeFuncs)/sizeof(executeFuncs[0])) {
             avm_error("Invalid opcode: %d", instr->opcode);

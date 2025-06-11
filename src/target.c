@@ -9,8 +9,9 @@
 
 // Global variables
 instruction* instructions = NULL;
-unsigned total_instructions = 0;
-unsigned curr_instruction = 0;
+
+unsigned total_instructions = 1; 
+unsigned curr_instruction = 1;    
 stack_T funcJumpStack = NULL;
 
 incomplete_jump* ij_head = NULL;
@@ -71,9 +72,9 @@ generator_func_t generators[] = {
 // Expand instruction array
 void expand_instructions(void) {
     assert(total_instructions == curr_instruction);
-    instruction* new_instructions = (instruction*)malloc(NEW_SIZE_INSTR);
+    instruction* new_instructions = (instruction*)malloc(NEW_SIZE_INSTR + sizeof(instruction));
     if (instructions) {
-        memcpy(new_instructions, instructions, CURR_SIZE_INSTR);
+        memcpy(new_instructions, instructions, CURR_SIZE_INSTR + sizeof(instruction));
         free(instructions);
     }
     instructions = new_instructions;
@@ -86,16 +87,8 @@ void emit_instruction(instruction* instr) {
         expand_instructions();
     }
     
-    unsigned instr_num = curr_instruction; 
     instructions[curr_instruction] = *instr;
     curr_instruction++;
-    
-    
-    incomplete_jump* ij = ij_head;
-    while (ij && ij->instrNo == instr_num - 1) { 
-        ij->instrNo = instr_num; 
-        break;
-    }
 }
 
 // Reset operand
@@ -286,18 +279,15 @@ void patch_incomplete_jumps(void) {
     while (ij) {
         unsigned target_address;
         
-        if (ij->iaddress >= currQuad) {
-            // Jump beyond program - go to end
-            target_address = curr_instruction;
-        } else if (ij->iaddress == 0) {
-            // Jump to end of program, not start
+        if (ij->iaddress >= currQuad || ij->iaddress == 0) {
+            // Jump beyond program or invalid
             target_address = curr_instruction;
         } else {
             // Normal case - get target quad's instruction address
             target_address = quads[ij->iaddress].taddress;
         }
         
-        // Apply the patch
+        // Apply the patch - note the < check is correct now
         if (ij->instrNo < curr_instruction) {
             instructions[ij->instrNo].result.val = target_address;
         }
@@ -782,7 +772,7 @@ void print_target_code(void) {
     printf("%-8s %-15s %-20s %-20s %-20s\n", "instr#", "opcode", "result", "arg1", "arg2");
     printf("----------------------------------------------------------------------------------------\n");
 
-    for (unsigned i = 0; i < curr_instruction; i++) {
+    for (unsigned i = 1; i < curr_instruction; i++) {  // Start from 1
         char resultStr[32], arg1Str[32], arg2Str[32];
 
         print_vmarg_to_string(instructions[i].result, resultStr, sizeof(resultStr));
@@ -870,10 +860,11 @@ void print_binary_file(const char* filename) {
    }
    
    // Write instructions
-   fwrite(&curr_instruction, sizeof(unsigned), 1, file);
-   fwrite(instructions, sizeof(instruction), curr_instruction, file);
+    unsigned actual_instruction_count = curr_instruction - 1;
+    fwrite(&actual_instruction_count, sizeof(unsigned), 1, file);
+    fwrite(&instructions[1], sizeof(instruction), actual_instruction_count, file);
    
-   fclose(file);
+    fclose(file);
 }
 
 // Συνάρτηση για εκτύπωση όλων των πινάκων σταθερών
