@@ -191,7 +191,9 @@ unsigned consts_newstring(char* s) {
 
     if (currStringConst == totalStringConsts) {
         totalStringConsts += 256;
-        stringConsts = (char**)realloc(stringConsts, totalStringConsts * sizeof(char*));
+        char** tmp = (char**)realloc(stringConsts, totalStringConsts * sizeof(char*));
+        if (!tmp) { fprintf(stderr, "Out of memory expanding string constants\n"); exit(1); }
+        stringConsts = tmp;
     }
     
     stringConsts[currStringConst] = strdup(s);
@@ -208,7 +210,9 @@ unsigned consts_newnumber(double n) {
 
     if (currNumConst == totalNumConsts) {
         totalNumConsts += 256;
-        numConsts = (double*)realloc(numConsts, totalNumConsts * sizeof(double));
+        double* tmp = (double*)realloc(numConsts, totalNumConsts * sizeof(double));
+        if (!tmp) { fprintf(stderr, "Out of memory expanding number constants\n"); exit(1); }
+        numConsts = tmp;
     }
     
     numConsts[currNumConst] = n;
@@ -225,7 +229,9 @@ unsigned libfuncs_newused(char* s) {
 
     if (currNamedLibfunc == totalNamedLibfuncs) {
         totalNamedLibfuncs += 256;
-        namedLibfuncs = (char**)realloc(namedLibfuncs, totalNamedLibfuncs * sizeof(char*));
+        char** tmp = (char**)realloc(namedLibfuncs, totalNamedLibfuncs * sizeof(char*));
+        if (!tmp) { fprintf(stderr, "Out of memory expanding library function names\n"); exit(1); }
+        namedLibfuncs = tmp;
     }
     
     namedLibfuncs[currNamedLibfunc] = strdup(s);

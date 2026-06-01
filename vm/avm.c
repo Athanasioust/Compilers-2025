@@ -270,6 +270,7 @@ avm_memcell* avm_translate_operand(vmarg* arg, avm_memcell* reg) {
             return reg;
             
         case string_a:
+            avm_memcellclear(reg);
             reg->type = string_m;
             reg->data.strVal = strdup(stringConsts[arg->val]);
             return reg;
@@ -405,6 +406,6 @@ int main(int argc, char* argv[]) {
     if (!executionFinished) {
         avm_run();
     }
-    
-    return 0;
+
+    return executionFinished ? 1 : 0;
 }

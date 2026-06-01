@@ -12,7 +12,7 @@ void avm_callsaveenvironment(void) {
     avm_dec_top();
     
     avm_stack[top].type = number_m;
-    avm_stack[top].data.numVal = top + AVM_STACKENV_SIZE + 2;
+    avm_stack[top].data.numVal = top + avm_totalActuals + 2;
     avm_dec_top();
     
     avm_stack[top].type = number_m;

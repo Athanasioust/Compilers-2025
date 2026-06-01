@@ -7,6 +7,12 @@
 #include <stdlib.h>
 #include <assert.h>
 
+static const char* str_ExprTypeName[] = {
+    "var", "tableitem", "programfunc", "libraryfunc",
+    "arithmexpr", "boolexpr", "assignexpr", "newtable",
+    "constnum", "constbool", "conststring", "nil"
+};
+
 
 
 Expr* emitIfTableItem(Expr* e);
@@ -61,6 +67,7 @@ int isLegal(int scope, int func_scope){
 
 
 int countDigits(int num){
+    if (num == 0) return 1;
     int count = 0;
     while(num){
         num /= 10;
@@ -653,12 +660,12 @@ Expr* HANDLE_REL_OP(iopcode op, Expr* expr1, Expr* expr2){
 
 
     if(check_arith_eligible(expr1) == -1 && op != if_eq && op != if_noteq) {
-        fprintf(stderr, "The type of expression 1, %s, is not compatible with relational operators.\n", str_iopcodeName[expr1->type]);
+        fprintf(stderr, "The type of expression 1, %s, is not compatible with relational operators.\n", str_ExprTypeName[expr1->type]);
         exit(1);
     }
 
     if(check_arith_eligible(expr2) == -1 && op != if_eq && op != if_noteq) {
-        fprintf(stderr, "The type of expression 2, %s, is not compatible with relational operators.\n", str_iopcodeName[expr2->type]);
+        fprintf(stderr, "The type of expression 2, %s, is not compatible with relational operators.\n", str_ExprTypeName[expr2->type]);
         exit(1);
     }
 

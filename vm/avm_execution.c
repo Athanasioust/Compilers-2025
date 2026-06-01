@@ -115,7 +115,7 @@ void execute_mod(instruction* instr) {
     
     avm_memcellclear(lv);
     lv->type = number_m;
-    lv->data.numVal = ((unsigned)rv1->data.numVal) % ((unsigned)rv2->data.numVal);
+    lv->data.numVal = fmod(rv1->data.numVal, rv2->data.numVal);
 }
 
 void execute_uminus(instruction* instr) {
@@ -389,7 +389,10 @@ void execute_call(instruction* instr) {
             break;
         }
         case string_m: {
-            avm_calllibfunc(func->data.strVal);
+            char* s = strdup(func->data.strVal);
+            avm_error("Call: cannot call a string value '%s'!", s);
+            free(s);
+            executionFinished = 1;
             break;
         }
         case libfunc_m: {
@@ -407,12 +410,12 @@ void execute_call(instruction* instr) {
 
 
 void execute_pusharg(instruction* instr) {
-    // Check if this is the first argument of a new call sequence
-    // by checking if the previous instruction was not pusharg
+    // Reset the counter at the start of a new call sequence.
+    // The previous-instruction check is still used as a heuristic for back-edges
+    // (jumps), but the execute_funcexit reset makes it reliable for the common case.
     if (pc > 1 && code[pc-1].opcode != pusharg_v) {
         avm_totalActuals = 0;
     }
-    
     avm_memcell* arg = avm_translate_operand(&instr->arg1, &ax);
     assert(arg);
     
@@ -425,13 +428,6 @@ void execute_funcenter(instruction* instr) {
     avm_memcell* func = avm_translate_operand(&instr->result, &ax);
     assert(func);
     assert(pc == userFuncs[func->data.funcVal].address);
-    
-    // Initialize totalActuals to 0 if not set by a proper call
-    if (avm_totalActuals == 0) {
-        // This handles direct function entry (like from funcstart)
-        // Set up minimal environment
-        avm_totalActuals = 0;
-    }
     
     userfunc* funcInfo = &userFuncs[func->data.funcVal];
     topsp = top;
@@ -447,10 +443,11 @@ void execute_funcenter(instruction* instr) {
 
 void execute_funcexit(instruction* unused) {
     unsigned oldTop = top;
-    top = avm_stack[topsp + AVM_SAVEDTOP_OFFSET].data.numVal;
-    pc = avm_stack[topsp + AVM_SAVEDPC_OFFSET].data.numVal;
-    topsp = avm_stack[topsp + AVM_SAVEDTOPSP_OFFSET].data.numVal;
-    
+    top    = (unsigned)avm_stack[topsp + AVM_SAVEDTOP_OFFSET].data.numVal;
+    pc     = (unsigned)avm_stack[topsp + AVM_SAVEDPC_OFFSET].data.numVal;
+    topsp  = (unsigned)avm_stack[topsp + AVM_SAVEDTOPSP_OFFSET].data.numVal;
+    avm_totalActuals = 0;
+
     while (++oldTop <= top)
         avm_memcellclear(&avm_stack[oldTop]);
 }
